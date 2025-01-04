@@ -6,6 +6,6 @@ sealed class Screens(val route:String){
     object Profile : Screens("profile")
     object BottomNavigation : Screens("bottomNavigation")
     object Search : Screens("search")
-    object Thread : Screens("thread")
+    object AddThread : Screens("thread")
     object Notification : Screens("notification")
 }
