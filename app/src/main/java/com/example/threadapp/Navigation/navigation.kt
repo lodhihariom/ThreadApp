@@ -5,7 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.threadapp.Screen.LoginScreen
 import com.example.threadapp.Screen.Screens
+import com.example.threadapp.Screen.SignUpScreen
 import com.example.threadapp.Screen.SplashScreen
 import com.example.threadapp.Screen.bottomNavigation
 
@@ -19,9 +21,15 @@ fun navigation(){
         composable(Screens.Splash.route) {
             SplashScreen(navController = navController)
         }
-        composable(Screens.BottomNavigation.route){
-            bottomNavigation(navController)
+        composable(Screens.Login.route){
+            LoginScreen(navController)
         }
+        composable(Screens.SignUp.route){
+            SignUpScreen(navController)
+        }
+//        composable(Screens.BottomNavigation.route){
+//            bottomNavigation(navController)
+//        }
 
         composable(Screens.Home.route) {
 
