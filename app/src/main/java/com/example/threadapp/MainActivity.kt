@@ -3,16 +3,11 @@ package com.example.threadapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.threadapp.Navigation.navigation
-import com.example.threadapp.Screen.LoginScreen
+import androidx.navigation.compose.rememberNavController
+
+import com.example.threadapp.Navigation.Navigation
+import com.example.threadapp.Screen.SplashScreen
+
 import com.example.threadapp.ui.theme.ThreadAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,9 +15,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 //        enableEdgeToEdge()
         setContent {
+            val navController = rememberNavController()
             ThreadAppTheme {
-                navigation()
-                }
+                Navigation()
+//                SplashScreen(navController)
+            }
             }
         }
 }

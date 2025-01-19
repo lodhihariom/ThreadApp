@@ -1,5 +1,6 @@
 package com.example.threadapp.Screen
 
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -28,106 +29,164 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.example.threadapp.Manifest
 import com.example.threadapp.R
+import android.Manifest
+import android.widget.Toast
+import androidx.compose.runtime.livedata.observeAsState
+import coil.compose.rememberAsyncImagePainter
+//import coil3.compose.rememberAsyncImagePainter
+import com.example.threadapp.viewmodel.AuthViewModel
+
+
+//import com.example.threadapp.ViewModel.AuthViewModel
+
 
 @Composable
-fun SignUpScreen( navController: NavController){
+fun SignUpScreen( navController: NavController, authViewModel: AuthViewModel) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var userName by remember {mutableStateOf("")  }
-        var Name by remember { mutableStateOf("") }
-        var email by remember {mutableStateOf("")  }
+        var name by remember { mutableStateOf("") }
+        var username by remember { mutableStateOf("") }
+        var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
-        var image by remember { mutableStateOf<Uri?>(null) }
-        val requestPermission = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-            android.Manifest.permission.READ_MEDIA_IMAGES
-        }else{
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-        var launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()){
+        var imageRef by remember { mutableStateOf<Uri?>(null) }
+        var context = LocalContext.current
+        var firebaseUser = authViewModel.firebaseUser.observeAsState(null)
 
+        val requestToPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
         }
-        var permissionLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()){
-            isGranted : Boolean->
-            if (isGranted){
 
-            }else{
+        var laucher =
+            rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+                imageRef = uri
+            }
+
+        //permissionLauncher
+        var permissionLauncher =
+            rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+                if (isGranted) {
+
+                } else {
+
+                }
 
             }
-        }
-        Text("Sign Up", style = TextStyle(fontSize = 30.sp))
-        Image(painter = painterResource(id = R.drawable.profile_image),
-            contentDescription = null,
-            modifier = Modifier.size(80.dp)
+
+
+        Text(
+            "Register",
+            style = TextStyle(
+                fontSize = 30.sp
+            )
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+        Image(
+            painter = if (imageRef == null) painterResource(id = R.drawable.profile_image)
+            else rememberAsyncImagePainter(imageRef),
+            modifier = Modifier
+                .size(80.dp)
                 .clip(CircleShape)
                 .clickable {
+                    var isGranted = ContextCompat.checkSelfPermission(
+                        context,
+                        requestToPermission
+                    ) == PackageManager.PERMISSION_GRANTED
 
+                    if (isGranted) {
+                        laucher.launch("image/*")
+                    } else {
+                        permissionLauncher.launch(requestToPermission)
+                    }
                 },
             contentScale = ContentScale.Crop,
-            )
+            contentDescription = null
+        )
+
         Spacer(modifier = Modifier.height(15.dp))
+
+
         OutlinedTextField(
-            value = email,
-            onValueChange = {email = it},
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Enter name...") },
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(8.dp),
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+        )
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Enter username...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            singleLine = true,
+        )
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Enter email...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            )
         )
         Spacer(modifier = Modifier.height(15.dp))
         OutlinedTextField(
             value = password,
-            onValueChange = {password = it},
-            label = { Text("Password") },
+            onValueChange = { password = it },
+            label = { Text("Enter password...") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(8.dp),
             singleLine = true
         )
-        OutlinedTextField(
-            value = Name,
-            onValueChange = {Name = it},
-            label = { Text("Name") },
-            modifier = Modifier.fillMaxWidth()
-                .padding(8.dp),
-            singleLine = true,
-//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-        )
-        OutlinedTextField(
-            value = userName,
-            onValueChange = {userName = it},
-            label = { Text("Username") },
-            modifier = Modifier.fillMaxWidth()
-                    .padding(8.dp),
-            singleLine = true,
-//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-        )
-        Button(
-            onClick = {
 
-            },
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Text("Submit")
-        }
-        Text("Already have an account? Login", style = TextStyle(
-            fontSize = 15.sp
-        ),modifier = Modifier.clickable {
-            navController.navigate(Screens.Login.route){
-
+        Button(onClick = {
+            if(name.isEmpty() || username.isEmpty()|| email.isEmpty()|| password.isEmpty()){
+                Toast.makeText(context,"Fill the details completely!!" , Toast.LENGTH_LONG).show()
+            }else{
+                authViewModel.signUp(email, password, name, username,context)
+                if (firebaseUser.value != null){
+                    navController.navigate(Screens.Home.route)
+                }
             }
-        })
+        }) {
+            Text("submit")
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+        Text("Already have an account? login",
+            style = TextStyle(
+                fontSize = 15.sp
+            ),
+            modifier = Modifier.clickable {
+                navController.navigate(Screens.Login.route) {
+                    popUpTo(navController.graph.startDestinationId)
+                    launchSingleTop = true
+                }
+            }
+        )
     }
 }

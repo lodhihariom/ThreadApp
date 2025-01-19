@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,10 +24,14 @@ fun SplashScreen(navController: NavController) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(painter = painterResource(id = R.drawable.thread_logo), contentDescription = "logo",modifier = Modifier.requiredSize(50.dp))
+        Icon(painter = painterResource(id = R.drawable.threads),
+            contentDescription = "App Logo",
+            modifier = Modifier.requiredSize(100.dp)
+        )
         LaunchedEffect(true) {
-            delay(1500)
+            delay(1000)
             if(FirebaseAuth.getInstance().currentUser != null){
+                println(FirebaseAuth.getInstance())
                 navController.navigate(Screens.Home.route)
             }else{
                 navController.navigate(Screens.SignUp.route)
