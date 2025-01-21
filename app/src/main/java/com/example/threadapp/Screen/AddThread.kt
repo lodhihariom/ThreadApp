@@ -49,13 +49,6 @@ import com.example.threadapp.R
 @Composable
 fun AddThreadScreen( navController: NavController){
     var context = LocalContext.current
-    Scaffold(
-        bottomBar = { myBottomBar(navController) }
-    ) {
-        LazyColumn(modifier = Modifier.padding(it)) {
-
-        }
-    }
     var caption by remember {
         mutableStateOf("")
     }
@@ -68,7 +61,7 @@ fun AddThreadScreen( navController: NavController){
         Manifest.permission.READ_EXTERNAL_STORAGE
     }
 
-    var laucher =
+    var launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
             imageRef = uri
         }
@@ -83,86 +76,181 @@ fun AddThreadScreen( navController: NavController){
             }
 
         }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
+    Scaffold(
+        bottomBar = { myBottomBar(navController) }
     ) {
+        LazyColumn(modifier = Modifier.padding(it)) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp)
+                ) {
+                    Text(
+                        "Add Thread",
+                        style = TextStyle(
+                            fontSize = 35.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.profile_image),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(75.dp)
+                                .clip(CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(15.dp))
+                        Text(
+                            text = SharedPref.getName(context),
+                            style = TextStyle(
+                                fontSize = 22.sp
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            OutlinedTextField(
+                                value = caption,
+                                onValueChange = { caption = it },
+                                label = { Text("Write caption here.....") },
+                                modifier = Modifier.width(350.dp)
+                            )
+                            Image(
+                                painter = painterResource(id = R.drawable.baseline_attach_file_24),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .clickable {
+                                        val isGranted = ContextCompat.checkSelfPermission(
+                                            context,
+                                            requestToPermission
+                                        ) == PackageManager.PERMISSION_GRANTED
 
-        Text(
-            "Add Thread",
-            style = TextStyle(
-                fontSize = 35.sp,
-                fontWeight = FontWeight.Bold
-            )
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.profile_image),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(75.dp)
-                    .clip(CircleShape)
-            )
-            Spacer(modifier = Modifier.width(15.dp))
-            Text(
-                text = SharedPref.getName(context),
-                style = TextStyle(
-                    fontSize = 22.sp
-                )
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                OutlinedTextField(
-                    value = caption,
-                    onValueChange = { caption = it },
-                    label = { Text("Write caption here.....") },
-                    modifier = Modifier.width(350.dp)
-                )
-                Image(painter = painterResource(id = R.drawable.baseline_attach_file_24),
-                    contentDescription = null,
-                    modifier = Modifier.clickable {
-                        var isGranted = ContextCompat.checkSelfPermission(
-                            context,
-                            requestToPermission
-                        ) == PackageManager.PERMISSION_GRANTED
-
-                        if (isGranted) {
-                            laucher.launch("image/*")
-                        } else {
-                            permissionLauncher.launch(requestToPermission)
+                                        if (isGranted) {
+                                            launcher.launch("image/*")
+                                        } else {
+                                            permissionLauncher.launch(requestToPermission)
+                                        }
+                                    }
+                                    .size(55.dp)
+                            )
                         }
-                    }.size(55.dp),
-
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row (
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ){
-                Button(
-                    onClick = {}
-
-                ) {
-                    Text("Cancel")
-                }
-                Button(
-                    onClick = {}
-                ) {
-                    Text("Post")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Button(
+                                onClick = {
+                                    // Handle cancel action
+                                }
+                            ) {
+                                Text("Cancel")
+                            }
+                            Button(
+                                onClick = {
+                                    // Handle post action
+                                    // Save the thread to the database
+                                }
+                            ) {
+                                Text("Post")
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+
+
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(20.dp)
+//    ) {
+//
+//        Text(
+//            "Add Thread",
+//            style = TextStyle(
+//                fontSize = 35.sp,
+//                fontWeight = FontWeight.Bold
+//            )
+//        )
+//        Spacer(modifier = Modifier.height(8.dp))
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Image(
+//                painter = painterResource(id = R.drawable.profile_image),
+//                contentDescription = null,
+//                modifier = Modifier
+//                    .size(75.dp)
+//                    .clip(CircleShape)
+//            )
+//            Spacer(modifier = Modifier.width(15.dp))
+//            Text(
+//                text = SharedPref.getName(context),
+//                style = TextStyle(
+//                    fontSize = 22.sp
+//                )
+//            )
+//        }
+//        Spacer(modifier = Modifier.height(8.dp))
+//        Column {
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceBetween
+//            ) {
+//                OutlinedTextField(
+//                    value = caption,
+//                    onValueChange = { caption = it },
+//                    label = { Text("Write caption here.....") },
+//                    modifier = Modifier.width(350.dp)
+//                )
+//                Image(painter = painterResource(id = R.drawable.baseline_attach_file_24),
+//                    contentDescription = null,
+//                    modifier = Modifier.clickable {
+//                        var isGranted = ContextCompat.checkSelfPermission(
+//                            context,
+//                            requestToPermission
+//                        ) == PackageManager.PERMISSION_GRANTED
+//
+//                        if (isGranted) {
+//                            laucher.launch("image/*")
+//                        } else {
+//                            permissionLauncher.launch(requestToPermission)
+//                        }
+//                    }.size(55.dp),
+//
+//                )
+//            }
+//            Spacer(modifier = Modifier.height(8.dp))
+//            Row (
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceBetween
+//            ){
+//                Button(
+//                    onClick = {}
+//
+//                ) {
+//                    Text("Cancel")
+//                }
+//                Button(
+//                    onClick = {}
+//                ) {
+//                    Text("Post")
+//                }
+//            }
+//        }
+//    }
 }

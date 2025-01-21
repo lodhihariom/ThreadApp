@@ -18,17 +18,19 @@ import com.example.threadapp.Screen.SignUpScreen
 import com.example.threadapp.Screen.SplashScreen
 import com.example.threadapp.Screen.bottomNavigation
 import com.example.threadapp.viewmodel.AuthViewModel
+import com.example.threadapp.viewmodel.SplashViewModel
 
 @Composable
 fun Navigation(){
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
+    val splashViewModel: SplashViewModel = viewModel()
     NavHost(
         navController = navController,
         startDestination = Screens.Splash.route
     ) {
         composable(Screens.Splash.route) {
-            SplashScreen(navController = navController)
+            SplashScreen(navController = navController, splashViewModel = splashViewModel)
         }
         composable(Screens.Login.route){
             LoginScreen(navController, authViewModel)
@@ -37,7 +39,7 @@ fun Navigation(){
             SignUpScreen(navController, authViewModel)
         }
         composable(Screens.Home.route) {
-           Home(navController)
+           Home(navController, authViewModel)
         }
         composable(Screens.Profile.route){
             ProfileScreen( navController = navController, authViewModel = authViewModel)
