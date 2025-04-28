@@ -1,6 +1,6 @@
 # ThreadApp
 
-ThreadApp is a social media application built using **Kotlin**, **Jetpack Compose**, and **Firebase**. It allows users to register, log in, and view threads posted by other users. The app also supports uploading images and fetching user data.
+ThreadApp is a social media application built using **Kotlin**, **Jetpack Compose**,**cloudinary** and **Firebase**. It allows users to register, log in, and view threads posted by other users. The app also supports uploading images and fetching user data.
 
 ## Features
 
@@ -31,6 +31,6 @@ app/ ├── src/ │ ├── main/ │ │ ├── java/com/example/threa
 
 1. Clone the repository:
    ```bash
-   git clone <>
+   git clone <https://github.com/lodhihariom/ThreadApp>
    cd ThreadApp
    
