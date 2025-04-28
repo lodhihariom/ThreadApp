@@ -10,4 +10,5 @@ sealed class Screens(val route:String){
     object Notification : Screens("notification")
     object Login : Screens("login")
     object SignUp : Screens("signup")
+    object OtherProfile : Screens("otherProfile")
 }

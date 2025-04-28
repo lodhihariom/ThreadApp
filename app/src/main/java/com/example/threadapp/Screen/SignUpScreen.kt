@@ -43,6 +43,7 @@ import android.Manifest
 import android.widget.Toast
 import androidx.compose.runtime.livedata.observeAsState
 import coil.compose.rememberAsyncImagePainter
+import com.example.threadapp.ImageUpLoading.uploadImageToCloudinary
 //import coil3.compose.rememberAsyncImagePainter
 import com.example.threadapp.viewmodel.AuthViewModel
 
@@ -165,10 +166,15 @@ fun SignUpScreen( navController: NavController, authViewModel: AuthViewModel) {
         )
 
         Button(onClick = {
-            if(name.isEmpty() || username.isEmpty()|| email.isEmpty()|| password.isEmpty()){
+            if(name.isEmpty() || username.isEmpty()|| email.isEmpty()|| password.isEmpty() || imageRef==null){
                 Toast.makeText(context,"Fill the details completely!!" , Toast.LENGTH_LONG).show()
             }else{
-                authViewModel.signUp(email, password, name, username,context)
+                if (imageRef!=null){
+                    uploadImageToCloudinary(context, imageRef!!,"thread"){
+                            url ->
+                        authViewModel.Register(email, password, name, username,url,context)
+                    }
+                }
                 if (firebaseUser.value != null){
                     navController.navigate(Screens.Home.route)
                 }

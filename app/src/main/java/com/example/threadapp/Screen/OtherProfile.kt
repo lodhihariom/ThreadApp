@@ -1,5 +1,6 @@
 package com.example.threadapp.Screen
 
+import com.example.threadapp.viewmodel.AuthViewModel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,16 +10,23 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 
+import kotlinx.coroutines.delay
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.*
 import androidx.compose.material3.Card
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
@@ -27,28 +35,47 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.threadapp.Model.SharedPref
 import com.example.threadapp.Model.ThreadData
-import com.example.threadapp.R
+import com.example.threadapp.Model.User
 import com.example.threadapp.ViewModel.UserViewModel
-import com.example.threadapp.viewmodel.AuthViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun ProfileScreen(
+fun OtherProfileScreen(
     navController: NavController,
     authViewModel: AuthViewModel,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    userId: String
 ) {
     val allThreads by userViewModel.threadData.observeAsState(emptyList())
+    val userData by userViewModel.userData.observeAsState(null)
+    LaunchedEffect(true) {
+        userId?.let {
+            userViewModel.fetchUser(userId)
+        }
+        FirebaseAuth.getInstance()?.currentUser?.uid?.let {
+            userViewModel.fetchThread(userId)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
 
-        ProfileHeader(authViewModel,navController)
+        if (userData != null) OtherProfileHeader(
+            authViewModel,
+            navController,
+            userViewModel,
+            userData!!
+        )
 
         Scaffold(
             bottomBar = { myBottomBar(navController) }
@@ -59,8 +86,7 @@ fun ProfileScreen(
                     .padding(it),
                 contentPadding = PaddingValues(8.dp)
             ) {
-                items(allThreads?: emptyList()) {
-                        thread->
+                items(allThreads ?: emptyList()) { thread ->
                     PostItem(thread)
                 }
             }
@@ -70,18 +96,34 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileHeader(authViewModel: AuthViewModel,
-                  navController:NavController) {
+fun OtherProfileHeader(
+    authViewModel: AuthViewModel,
+    navController: NavController,
+    userViewModel: UserViewModel,
+    user: User
+) {
     var firebaseUser = authViewModel.firebaseUser.observeAsState()
     var context = LocalContext.current
+
+    var currentId = ""
+    if(FirebaseAuth.getInstance().currentUser?.uid!=null){
+        currentId = FirebaseAuth.getInstance().currentUser?.uid!!
+        userViewModel.getFollowers(user.uid.toString())
+        userViewModel.getFollowing(user.uid.toString())
+    }
+
+    val followerList by userViewModel.followerList.observeAsState(emptyList())
+    val followingList by userViewModel.followingList.observeAsState(emptyList())
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.profile_image),
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(SharedPref.getImage(context)).build(),
             contentDescription = "Profile Image",
             modifier = Modifier
                 .size(100.dp)
@@ -90,7 +132,7 @@ fun ProfileHeader(authViewModel: AuthViewModel,
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = SharedPref.getName(context), fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Text(text = user.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = "Android developer", fontSize = 14.sp, color = Color.Gray)
         Spacer(modifier = Modifier.height(8.dp))
@@ -101,7 +143,7 @@ fun ProfileHeader(authViewModel: AuthViewModel,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "500",
+                    text = "${followerList.size}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
@@ -109,7 +151,7 @@ fun ProfileHeader(authViewModel: AuthViewModel,
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "250",
+                    text = "${followingList.size}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
@@ -118,31 +160,31 @@ fun ProfileHeader(authViewModel: AuthViewModel,
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Logout Button
         Button(
             onClick = {
-                authViewModel.logOut()
-                if (firebaseUser.value == null){
-                    println(firebaseUser.value)
-                    navController.navigate(Screens.Login.route)
-                }},
+                if(currentId.isNotEmpty()){
+                    userViewModel.followUser(user.uid.toString(),currentId)
+                }
+            },
         ) {
-            Text(text = "Logout", color = Color.White, fontSize = 16.sp)
+            Text(text = if(followerList!= null && followerList.contains(currentId))"following" else "follow"
+                , color = Color.White, fontSize = 16.sp)
         }
     }
 }
 
 @Composable
-fun PostItem(threadData: ThreadData) {
+fun OtherPostItem(threadData: ThreadData) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
 //        elevation = 4.dp
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.thread_post_picture),
-            contentDescription = "User Post",
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(threadData.imgUrl).build(),
+            contentDescription = "user post",
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp),
@@ -150,7 +192,6 @@ fun PostItem(threadData: ThreadData) {
         )
     }
 }
-
 
 
 /*@Composable
